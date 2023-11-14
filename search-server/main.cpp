@@ -60,10 +60,10 @@ class SearchServer {
 void AddDocument(const int& document_id, const string& document) { 
     const vector<string> words = SplitIntoWordsNoStop(document); 
     double size=words.size(); 
-    //++documents_count_; Когда пишу такую строчку тренажер снова пишет медленно... Хотя не могу понять как тренажер вобще может обнаружить такое незначительное изменение времени работы
+    ++documents_count_;// Сделал подсчет доументов при добавлении. После исправления FindAllDocuments работает достаточно быстро
     for (const string& word: words){
         index_[word][document_id] += 1/size;
-        // Да, так гораздо короче и лучше смотрится! С одним циклом и с //map<string,map<...>> вместо map<string,map<set<pair<...>>
+        
     }
 }
     vector<Document> FindTopDocuments(const string& raw_query) const  {
@@ -78,23 +78,15 @@ void AddDocument(const int& document_id, const string& document) {
         return matched_documents; 
     } 
 
- void SetDocumentsCount(int documents_count){
-/* она мне нужна, потому что documents_count_ - private , 
-но используется только один раз при создании обьекта класса,
- вместо того, чтобы при каждом добавлении документа увеличивать на 1. 
-Это и не логично, ведь количество документов в этой задаче просто задается изначально, зачем их считать?...
-*/
-     documents_count_=documents_count; 
- } 
+
 
 private: 
-    map<string,map<int,double>> index_;// заменил set на map стало логичнее  и короче 
+    map<string,map<int,double>> index_;
     set<string> stop_words_; 
     int documents_count_=0; 
-    double idf_calculate(const string& word) const{
+    double IdfCalculate(const string& word) const{
            
         double idf=log(static_cast<double>(documents_count_)/index_.at(word).size()); 
-         // сделал в одну строку, про static_cast<Type> постараюсь не забывать
         return idf;
     }
     bool IsStopWord(const string& word) const { 
@@ -128,15 +120,16 @@ private:
  
 
     vector<Document> FindAllDocuments(const Query& query_words) const { 
+        // исправил эту функцию
         vector<Document> matched_documents; 
         map<int,double> documents_hit; 
-        for (int id=0; id<documents_count_;++id ) documents_hit[id]=-1; 
+        
         for (const string& word : query_words.plus_words){
             if (index_.count(word)>0){
-               double idf=idf_calculate(word);
-              //Да, все ок, просто в прошлый раз я ее зачем-то в цикле каждый раз вызывал
+               double idf=IdfCalculate(word);
+              
            for (const pair<int,double>& tf :index_.at(word) ){ 
-               if (documents_hit[tf.first]==-1)  documents_hit[tf.first]=0; 
+              
                 documents_hit[tf.first]+=tf.second*idf; 
                 } 
             } 
@@ -146,12 +139,12 @@ private:
            if (index_.count(word)>0){ 
 
            for (pair<int,double> tf :index_.at(word) ){ 
-                    documents_hit[tf.first]=-1; 
+                    documents_hit.erase(tf.first); 
                 } 
             } 
         }
-        for (int id=0; id<documents_count_;++id ) { 
-            if (documents_hit[id]>=0) matched_documents.push_back({id,documents_hit[id]}); 
+        for (pair<int,double> tf:documents_hit ) { 
+            matched_documents.push_back({tf.first,tf.second}); 
         } 
         return matched_documents; 
     } 
@@ -165,7 +158,6 @@ SearchServer CreateSearchServer() {
     for (int document_id = 0; document_id < document_count; ++document_id) { 
         search_server.AddDocument(document_id, ReadLine()); 
     } 
-    search_server.SetDocumentsCount(document_count); 
     return search_server; 
 } 
 
