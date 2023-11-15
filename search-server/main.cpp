@@ -59,10 +59,10 @@ class SearchServer {
 
 void AddDocument(const int& document_id, const string& document) { 
     const vector<string> words = SplitIntoWordsNoStop(document); 
-    double size=words.size(); 
+    double size_invert=1/static_cast<double>(words.size()); 
     ++documents_count_;// Сделал подсчет доументов при добавлении. После исправления FindAllDocuments работает достаточно быстро
     for (const string& word: words){
-        index_[word][document_id] += 1/size;
+        index_[word][document_id] +=size_invert;
         
     }
 }
@@ -126,19 +126,16 @@ private:
         
         for (const string& word : query_words.plus_words){
             if (index_.count(word)>0){
-               double idf=IdfCalculate(word);
-              
-           for (const pair<int,double>& tf :index_.at(word) ){ 
-              
-                documents_hit[tf.first]+=tf.second*idf; 
+                double idf=IdfCalculate(word);
+                for (const pair<int,double>& tf :index_.at(word) ){
+                    documents_hit[tf.first]+=tf.second*idf; 
                 } 
             } 
         } 
-
-       for (const string& word : query_words.minus_words){ 
-           if (index_.count(word)>0){ 
-
-           for (pair<int,double> tf :index_.at(word) ){ 
+        
+        for (const string& word : query_words.minus_words){ 
+            if (index_.count(word)>0){ 
+                for (pair<int,double> tf :index_.at(word) ){ 
                     documents_hit.erase(tf.first); 
                 } 
             } 
