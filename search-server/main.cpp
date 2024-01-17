@@ -87,7 +87,9 @@ public:
     explicit SearchServer(const StringContainer& stop_words)
         : stop_words_(MakeUniqueNonEmptyStrings(stop_words)) {
             for (const string& word:stop_words){
-                if (!IsValidWord(word)) throw invalid_argument("wrong simvol!");
+                if (!IsValidWord(word)) {
+                    throw invalid_argument("wrong simvol!");
+                }
             }
             
     }
@@ -95,17 +97,21 @@ public:
     explicit SearchServer(const string& stop_words_text)
         : SearchServer(
             SplitIntoWords(stop_words_text))  // Invoke delegating constructor from string container
-    {
-        if (!IsValidWord(stop_words_text)) throw invalid_argument("wrong simvol!");
-    }
+    {}
 
      void AddDocument(int document_id, const string& document, DocumentStatus status,
                      const vector<int>& ratings) {
-        if (document_id<0) throw invalid_argument("id<0");
-        if(!IsValidWord(document)) throw invalid_argument("wrong simvol!");
-        if (NotValid(document)) throw invalid_argument("wrong document!");
+        if (document_id<0) {
+            throw invalid_argument("id<0");
+        }
+        if(!IsValidWord(document)) {
+            throw invalid_argument("wrong simvol!");
+        }
+       
         for (auto document:documents_){
-            if (document.first==document_id) throw invalid_argument("Wrong ID!");
+            if (document.first==document_id) {
+                throw invalid_argument("Wrong ID!");
+            }
         }
         const vector<string> words = SplitIntoWordsNoStop(document);
         const double inv_word_count = 1.0 / words.size();
@@ -120,8 +126,10 @@ public:
     vector<Document> FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const  {
         vector<Document> result;
      
-        if(!IsValidWord(raw_query)) throw invalid_argument("wrong simvol!");
-        if (NotValid(raw_query)) throw invalid_argument("wrong document!");
+        if(!IsValidWord(raw_query)) {
+            throw invalid_argument("wrong simvol!");
+        }
+        
         const Query query = ParseQuery(raw_query);
         result = FindAllDocuments(query, document_predicate);
 
@@ -157,8 +165,9 @@ public:
     tuple<vector<string>, DocumentStatus> MatchDocument(const string& raw_query, int document_id) const  {
        
         tuple<vector<string>, DocumentStatus> result;
-        if(!IsValidWord(raw_query)) throw invalid_argument("wrong simvol!");
-        if (NotValid(raw_query)) throw invalid_argument("wrong document!");
+        if(!IsValidWord(raw_query)) {
+            throw invalid_argument("wrong simvol!");
+        }
         const Query query = ParseQuery(raw_query);
        // vector<string> matched_words;
         for (const string& word : query.plus_words) {
@@ -183,7 +192,9 @@ public:
     }
     
     int GetDocumentId(int index) const {
-        if (index<0 ||index>=GetDocumentCount()) throw out_of_range("out of range!");
+        if (index<0 ||index>=GetDocumentCount()) {
+            throw out_of_range("out of range!");
+        }
         int i=0;
         for (auto document:documents_){
             if (index==i) {
@@ -240,6 +251,17 @@ private:
         bool is_minus = false;
         // Word shouldn't be empty
         if (text[0] == '-') {
+            if (text.size()==1) {
+                throw invalid_argument("wrong document!");
+            }
+            else{
+                if (text[text.size()-1]=='-') {
+                    throw invalid_argument("wrong document!");
+                }
+                if (text[1]=='-'){
+                    throw invalid_argument("wrong document!");
+                }
+            }
             is_minus = true;
             text = text.substr(1);
         }
@@ -315,35 +337,7 @@ private:
             return c >= '\0' && c < ' ';
         });
     }
-     bool NotValid(const string &text) const{
-        vector<string> words;
-    string word;
-    for (const char c : text) {
-        if (c == ' ') {
-            if (!word.empty()) {
-                words.push_back(word);
-                word.clear();
-            }
-        } else {
-            word += c;
-        }
-    }
-    if (!word.empty()) {
-        words.push_back(word);
-    }
-
-        for (string word:words){
-            if (word[0]=='-'){
-                if (word.size()==1) {return true;}
-                else{
-                    if (word[1]=='-') return true;
-                    if (word[word.size()-1]=='-') return true;
-                }
-            }
-            
-        }
-         return false;
-    }
+    
     
 };
 
