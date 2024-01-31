@@ -2,6 +2,7 @@
 #include <cmath> 
 #include <iostream> 
 #include <map> 
+#include <numeric>
 #include <optional> 
 #include <set> 
 #include <stdexcept> 
@@ -81,7 +82,6 @@ class SearchServer {
 
 public: 
 
-    inline static constexpr int INVALID_DOCUMENT_ID = -1; 
     template <typename StringContainer> 
     explicit SearchServer(const StringContainer& stop_words) 
         : stop_words_(MakeUniqueNonEmptyStrings(stop_words)) { 
@@ -196,7 +196,7 @@ public:
         if (index<0 ||index>=GetDocumentCount()) { 
             throw out_of_range("out of range!"); 
         } 
-        return index_[index]; 
+        return index_.at(index); 
     } 
  
 private:
@@ -228,10 +228,8 @@ private:
         if (ratings.empty()) { 
             return 0; 
         } 
-        int rating_sum = 0; 
-        for (const int rating : ratings) { 
-            rating_sum += rating; 
-        } 
+        int rating_sum = accumulate(ratings.begin(),ratings.end(),0);
+        
         return rating_sum / static_cast<int>(ratings.size()); 
     } 
     struct QueryWord { 
@@ -241,6 +239,10 @@ private:
     }; 
 
     QueryWord ParseQueryWord(string text) const { 
+        // Не понимаю, что значит выражение "дублируюсь по коду". 
+        // я использую функцию IsValidWord в трех местах, при вводе стоп слов, при добавлении каждого документа и при вводе каждого запроса. 
+        // В двух последних случаях я проверяю сразу всю фразу, до разбиения ее на слова. 
+        // Мне кажется, так вполне логично и прямо, и наверное более оптимально, чем вызывать функцию для каждого слова 
         bool is_minus = false; 
         // Word shouldn't be empty 
         if (text[0] == '-') { 
@@ -253,7 +255,7 @@ private:
                 //if (text[text.size()-1]=='-') { 
                 //    throw invalid_argument("wrong document!"); 
                 //} 
-                if (text[1]=='-'){ 
+                if (text[0]=='-'){ 
                     throw invalid_argument("wrong document!"); 
                 } 
             } 
