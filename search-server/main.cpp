@@ -127,9 +127,7 @@ public:
     vector<Document> FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const  { 
 
         vector<Document> result; 
-        if(!IsValidWord(raw_query)) { 
-            throw invalid_argument("wrong simvol!"); 
-        } 
+        
         const Query query = ParseQuery(raw_query); 
         result = FindAllDocuments(query, document_predicate); 
         sort(result.begin(), result.end(), 
@@ -239,10 +237,9 @@ private:
     }; 
 
     QueryWord ParseQueryWord(string text) const { 
-        // Не понимаю, что значит выражение "дублируюсь по коду". 
-        // я использую функцию IsValidWord в трех местах, при вводе стоп слов, при добавлении каждого документа и при вводе каждого запроса. 
-        // В двух последних случаях я проверяю сразу всю фразу, до разбиения ее на слова. 
-        // Мне кажется, так вполне логично и прямо, и наверное более оптимально, чем вызывать функцию для каждого слова 
+        if(!IsValidWord(text)) { 
+            throw invalid_argument("wrong simvol!"); 
+        } 
         bool is_minus = false; 
         // Word shouldn't be empty 
         if (text[0] == '-') { 
