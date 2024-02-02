@@ -161,9 +161,7 @@ public:
 
     tuple<vector<string>, DocumentStatus> MatchDocument(const string& raw_query, int document_id) const  { 
         tuple<vector<string>, DocumentStatus> result; 
-        if(!IsValidWord(raw_query)) { 
-            throw invalid_argument("wrong simvol!"); 
-        } 
+        
         const Query query = ParseQuery(raw_query);
        // vector<string> matched_words; 
         for (const string& word : query.plus_words) { 
@@ -248,14 +246,11 @@ private:
             if (text.size()==0) { 
                 throw invalid_argument("wrong document!"); 
             } 
-            else{ 
-                //if (text[text.size()-1]=='-') { 
-                //    throw invalid_argument("wrong document!"); 
-                //} 
-                if (text[0]=='-'){ 
-                    throw invalid_argument("wrong document!"); 
-                } 
+            
+            if (text[0]=='-'){ 
+                throw invalid_argument("wrong document!"); 
             } 
+            
         } 
         return {text, is_minus, IsStopWord(text)}; 
     } 
