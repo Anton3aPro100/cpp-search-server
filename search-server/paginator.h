@@ -1,9 +1,8 @@
-//Вставьте сюда своё решение из урока «‎Очередь запросов».
+#pragma once
+
 #include <vector>
 #include <iostream>
 #include <string>
-#pragma once
-
 
 template <typename Iterator>       
 class Paginator {
@@ -59,8 +58,7 @@ std::ostream& operator<<(std::ostream& output, std::pair<Iterator,Iterator> x) {
         output <<"{ document_id = "<< it->id<<", relevance = "<<it->relevance<<", rating = "<<it->rating<<" }" ;
         advance(it,1);
     }
-    //output <<endl<<"Page break"<<endl;
-    //{ document_id = 2, relevance = 0.402359, rating = 2 }{ document_id = 4, relevance = 0.229073, rating = 2 }
+    
     
     return output;
 }

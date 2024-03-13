@@ -1,18 +1,6 @@
-//Вставьте сюда своё решение из урока «Очередь запросов» темы «Стек, очередь, дек».‎
-//Вставьте сюда своё решение из урока «Очередь запросов» темы «Стек, очередь, дек».
-#include <algorithm>
-#include <cmath>
-#include <deque>
 #include <iostream>
-#include <iterator>
-#include <map>
-#include <set>
-#include <stdexcept>
 #include <string>
-#include <utility>
-#include <vector>
 
- 
 #include "document.h"
 #include "search_server.h"
 #include "string_processing.h"

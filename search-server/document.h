@@ -1,5 +1,13 @@
-//Вставьте сюда своё решение из урока «Очередь запросов» темы «Стек, очередь, дек».‎
+
 #pragma once
+
+enum class DocumentStatus {
+    ACTUAL,
+    IRRELEVANT,
+    BANNED,
+    REMOVED,
+};
+
 struct Document {
     Document() = default;
 
